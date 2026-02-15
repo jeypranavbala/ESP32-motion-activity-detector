@@ -1,24 +1,24 @@
-# ESP32-motion-activity-detector
-ESP32-based activity monitoring system using MPU6050 accelerometer and OLED display with real-time motion detection.
 # ESP32 Activity Monitoring System (MPU6050 + OLED)
 
-This project implements a real-time activity monitoring system using an ESP32, MPU6050 accelerometer sensor, and SSD1306 OLED display.
+This project implements a real-time activity monitoring system using an ESP32, MPU6050 accelerometer, and SSD1306 OLED display.  
+The system detects user activity based on motion intensity using variance-based signal analysis and displays the current activity state.
 
-The system detects user activity (Sitting, Jogging, Running) based on acceleration data and displays the current status on the OLED screen. A touch sensor is used to switch between animation and activity monitoring modes.
+The implementation uses a sliding window algorithm with a circular buffer to classify motion as Sitting, Walking, or Running.
 
-This project was developed for embedded systems and sensor interfacing practice.
+This project was developed for embedded systems, sensor interfacing, and real-time signal processing practice.
 
 ---
 
 ## Features
 
-- Real-time activity detection using MPU6050 accelerometer
-- Motion classification (Sitting / Jogging / Running)
-- OLED display visualization using SSD1306
-- Touch sensor-based UI state switching
-- Simple animation display mode
-- Activity timeout and automatic screen switching
-- I2C communication with sensors and display
+- Real-time motion detection using MPU6050 accelerometer
+- Variance-based activity classification
+- Sliding window signal processing
+- Circular buffer implementation
+- OLED display visualization
+- Touch sensor based UI state switching
+- Animation and activity monitoring modes
+- Noise-resistant motion detection
 
 ---
 
@@ -34,34 +34,54 @@ This project was developed for embedded systems and sensor interfacing practice.
 
 ## System Overview
 
-The system reads acceleration data from the MPU6050 sensor and computes total acceleration magnitude. Based on threshold values, the firmware classifies the user's activity and displays the result.
+The system continuously reads acceleration data from the MPU6050 sensor and computes motion intensity using statistical variance over a sliding window of samples.
 
 ### System Workflow
 
-1. MPU6050 provides acceleration data.
-2. ESP32 calculates total acceleration magnitude.
-3. Activity is classified using threshold comparison.
-4. OLED displays animation or activity status.
-5. Touch sensor toggles system state.
+1. MPU6050 provides acceleration readings.
+2. ESP32 computes total acceleration magnitude.
+3. Recent samples are stored in a circular buffer.
+4. Motion variance is calculated over the sliding window.
+5. Activity is classified based on motion intensity.
+6. OLED displays detected activity.
 
 ---
 
-## Activity Classification Logic
+## Motion Detection Method
 
-| Acceleration Range | Activity |
+Instead of simple threshold-based classification, the system uses variance-based signal analysis.
+
+### Algorithm
+
+- Collect N acceleration samples (sliding window).
+- Compute mean acceleration.
+- Compute variance of samples.
+- Classify activity based on motion intensity.
+
+### Variance Formula
+
+
+
+This approach improves stability and reduces false detection caused by sensor noise.
+
+---
+
+## Activity Classification
+
+| Motion Variance | Activity |
 |---|---|
-| ≤ 11 m/s² | Sitting |
-| 11 – 13 m/s² | Jogging |
-| > 13 m/s² | Running |
+Low variance | Sitting |
+Medium variance | Walking |
+High variance | Running |
 
 ---
 
-## Software Components
+## Software Architecture
 
 - ESP32 firmware (Arduino framework)
-- MPU6050 sensor driver
-- SSD1306 display driver
-- I2C communication interface
+- I2C communication with MPU6050 and OLED
+- Circular buffer implementation
+- Sliding window variance calculation
 - State machine for UI control
 
 ---
@@ -75,24 +95,35 @@ The system reads acceleration data from the MPU6050 sensor and computes total ac
 
 ---
 
-## How to Run
+## Sampling Behavior
 
-1. Open project in Arduino IDE.
-2. Install required libraries.
-3. Select ESP32 board.
-4. Connect MPU6050 and OLED via I2C.
-5. Upload firmware to ESP32.
+- Sensor sampled every 200 ms
+- Sliding window size: 20 samples
+- First stable detection after buffer initialization (~4 seconds)
 
 ---
 
 ## Learning Outcomes
 
+This project demonstrates:
+
 - Embedded sensor interfacing
 - I2C communication
 - Real-time data processing
-- Activity detection logic
+- Signal processing in embedded systems
+- Circular buffer design
+- Statistical motion analysis
 - Embedded display control
-- State machine design
+
+---
+
+## Future Improvements
+
+- Low-pass filtering for additional noise reduction
+- Step detection algorithm
+- Interrupt-based sampling
+- Sensor calibration
+- Power optimization
 
 ---
 
